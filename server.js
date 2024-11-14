@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 
 // Inicializar la aplicación Express
 const app = express();
-const port = process.env.PORT || 10000;
+const port = process.env.PORT || 3000;
 
 // Middleware para manejar JSON y CORS
 app.use(bodyParser.json());
