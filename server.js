@@ -46,6 +46,11 @@ const medicoSchema = new mongoose.Schema({
 const Paciente = mongoose.model('Paciente', pacienteSchema);
 const Medico = mongoose.model('Medico', medicoSchema);
 
+// Ruta raíz (muestra un mensaje básico cuando se accede a la raíz)
+app.get('/', (req, res) => {
+  res.send('¡Bienvenido al sistema de citas médicas!');
+});
+
 // Rutas para obtener médicos y pacientes
 app.get('/medicos', async (req, res) => {
     try {
