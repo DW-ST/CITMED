@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 // Inicializar la aplicación Express
 const app = express();
@@ -12,6 +13,9 @@ const port = process.env.PORT || 3000;  // Usar el puerto proporcionado por Rend
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors());
+
+// Servir archivos estáticos desde la carpeta 'public'
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Conexión a MongoDB
 const uri = 'mongodb+srv://labuenaesperanzasoporte:7uVLVDgRw7LRmw8E@cluster0.y72mk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
@@ -45,7 +49,7 @@ const Medico = mongoose.model('Medico', medicoSchema);
 
 // Ruta raíz (muestra un mensaje básico cuando se accede a la raíz)
 app.get('/', (req, res) => {
-  res.send('¡Bienvenido al sistema de citas médicas!');
+    res.sendFile(path.join(__dirname, 'public', 'cita.html'));  // Asegúrate de que 'cita.html' esté en la carpeta 'public'
 });
 
 // Rutas para obtener médicos y pacientes
