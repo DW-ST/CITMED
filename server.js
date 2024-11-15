@@ -52,7 +52,7 @@ app.get('/', (req, res) => {
 });
 
 // Rutas para obtener médicos y pacientes
-app.get('/medicos', (req, res) => {
+app.get('/medicos', async (req, res) => {
     try {
         const medicos = await Medico.find();
         res.json(medicos);
