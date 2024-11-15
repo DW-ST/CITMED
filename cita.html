@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CITMED</title>
+    <title>Sistema de Citas Médicas</title>
     <style>
-        body {text-align: center; font-family: Candara, sans-serif; }
-        #formularioCita, #agenda, #nuevoUsuario { text-align:center;display: none; margin-top: 20px; }
-        button {text-align: center; margin-top: 10px; padding: 10px; font-size: 16px; }
+        body { font-family: Arial, sans-serif; }
+        #formularioCita, #agenda, #nuevoUsuario { display: none; margin-top: 20px; }
+        button { margin-top: 10px; padding: 10px; font-size: 16px; }
     </style>
 </head>
 <body>
-    <h1 style="color: #25a9dd;text-align: center;";>CITMED</h1>
+    <h1>Sistema de Citas Médicas</h1>
 
     <div id="menu">
         <button onclick="mostrarFormularioCita()">Solicitar Cita</button>
@@ -67,8 +67,8 @@ async function mostrarFormularioCita() {
 
     try {
         // Obtener los médicos y pacientes desde la base de datos (servidor)
-        const medicosResponse = await fetch('https://citmed.onrender.com/medicos');
-        const pacientesResponse = await fetch('https://citmed.onrender.com/pacientes');
+        const medicosResponse = await fetch('http://localhost:3000/medicos');
+        const pacientesResponse = await fetch('http://localhost:3000/pacientes');
         
         const medicosDb = await medicosResponse.json();
         const pacientesDb = await pacientesResponse.json();
@@ -112,7 +112,7 @@ async function confirmarCita() {
     try {
         // Hacer una solicitud POST a la API para confirmar la cita
         const confirmarcita = { medicoId, pacienteId, fechaHora }
-        const response = await fetch('https://citmed.onrender.com/confirmar-cita', {
+        const response = await fetch('http://localhost:3000/confirmar-cita', {
             method: 'POST', // Usamos POST porque estamos enviando datos
             headers: {'Content-Type': 'application/json'},  // Indicamos que estamos enviando JSON
             body: JSON.stringify(confirmarcita)
@@ -153,7 +153,7 @@ async function mostrarAgenda() {
 
     try {
         // Obtener la agenda de los médicos desde el servidor
-        const response = await fetch('https://citmed.onrender.com/agenda');
+        const response = await fetch('http://localhost:3000/agenda');
         
         // Si la respuesta no es exitosa, muestra un mensaje de error
         if (!response.ok) {
@@ -213,7 +213,7 @@ async function agregarUsuario() {
         if (tipoUsuario === 'paciente') {
             // Crear un nuevo paciente y guardar en la base de datos
             const nuevoPaciente = { id, nombre, telefono };
-            const response = await fetch('https://citmed.onrender.com/pacientes', {
+            const response = await fetch('http://localhost:3000/pacientes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(nuevoPaciente)
@@ -228,7 +228,7 @@ async function agregarUsuario() {
         } else if (tipoUsuario === 'medico') {
             // Crear un nuevo médico y guardar en la base de datos
             const nuevoMedico = { id, nombre, especialidad };
-            const response = await fetch('https://citmed.onrender.com/medicos', {
+            const response = await fetch('http://localhost:3000/medicos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(nuevoMedico)
