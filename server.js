@@ -156,4 +156,3 @@ app.get('/agenda', async (req, res) => {
 app.listen(port, () => {
     console.log(`Servidor escuchando en el puerto ${port}`);
 });
->>>>>>> ba09b72 (Guardando cambios locales antes de pull)
