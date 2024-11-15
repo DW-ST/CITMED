@@ -159,21 +159,23 @@ app.listen(port, () => {
 });
 =======
 // server.js
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-
+const path = require('path');
 
 // Inicializar la aplicación Express
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;  // Usar el puerto proporcionado por Render
 
 // Middleware para manejar JSON y CORS
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors());
+
+// Servir archivos estáticos desde la carpeta 'public'
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Conexión a MongoDB
 const uri = 'mongodb+srv://labuenaesperanzasoporte:7uVLVDgRw7LRmw8E@cluster0.y72mk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
@@ -185,7 +187,6 @@ mongoose.connect(uri, {
 .catch((err) => console.error('Error de conexión:', err));
 
 // Definir los esquemas de Mongoose
-
 const pacienteSchema = new mongoose.Schema({
     id: Number,
     nombre: String,
@@ -205,6 +206,11 @@ const medicoSchema = new mongoose.Schema({
 // Modelos de Mongoose
 const Paciente = mongoose.model('Paciente', pacienteSchema);
 const Medico = mongoose.model('Medico', medicoSchema);
+
+// Ruta raíz (muestra un mensaje básico cuando se accede a la raíz)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'cita.html'));  // Asegúrate de que 'cita.html' esté en la carpeta 'public'
+});
 
 // Rutas para obtener médicos y pacientes
 app.get('/medicos', async (req, res) => {
@@ -233,7 +239,7 @@ app.post('/pacientes', async (req, res) => {
         await paciente.save();
         res.status(201).json(paciente);
     } catch (error) {
-        console.error('Error al agregar paciente:', error);  // Esto imprimirá el error completo en la consola
+        console.error('Error al agregar paciente:', error);
         res.status(500).json({ message: 'Error al agregar paciente', error: error.message });
     }
 });
@@ -246,7 +252,7 @@ app.post('/medicos', async (req, res) => {
         await medico.save();
         res.status(201).json(medico);
     } catch (error) {
-        console.error('Error al agregar médico:', error);  // Esto imprimirá el error completo en la consola
+        console.error('Error al agregar médico:', error);
         res.status(500).json({ message: 'Error al agregar médico', error: error.message });
     }
 });
@@ -256,7 +262,6 @@ app.post('/confirmar-cita', async (req, res) => {
     const { medicoId, pacienteId, fechaHora } = req.body;
 
     try {
-        // Aquí deberías buscar al médico y paciente en la base de datos
         const medico = await Medico.findOne({ id: medicoId });
         const paciente = await Paciente.findOne({ id: pacienteId });
 
@@ -264,16 +269,12 @@ app.post('/confirmar-cita', async (req, res) => {
             return res.status(404).json({ message: 'Médico o paciente no encontrados' });
         }
 
-        // Parsear la fecha
         const fecha = new Date(fechaHora);
-
-        // Verificar si ya existe una cita en esa fecha
         const citaExistente = medico.agenda.some(cita => cita.fechaHora.getTime() === fecha.getTime());
         if (citaExistente) {
             return res.status(400).json({ message: 'Ya existe una cita en esa fecha y hora.' });
         }
 
-        // Crear la cita y agregarla al médico
         medico.agenda.push({ paciente: paciente._id, fechaHora: fecha });
         await medico.save();
 
@@ -283,29 +284,26 @@ app.post('/confirmar-cita', async (req, res) => {
         res.status(500).json({ message: 'Hubo un error al confirmar la cita.', error: error.message });
     }
 });
+
+// Ruta para obtener la agenda de todos los médicos
 app.get('/agenda', async (req, res) => {
     try {
-        // Obtener todos los médicos de la base de datos, con sus agendas
-        const medicos = await Medico.find().populate('agenda.paciente'); // Asegurarse de que 'agenda.paciente' es el campo correcto
+        const medicos = await Medico.find().populate('agenda.paciente'); // Asegúrate de que 'agenda.paciente' sea correcto
 
         if (medicos.length === 0) {
             console.error('No se encontraron médicos en la base de datos');
             return res.status(404).json({ message: 'No se encontraron médicos en la base de datos' });
         }
 
-        // Preparamos la respuesta con la información de cada médico y sus citas
-        const agendaMedicos = medicos.map(medico => {
-            return {
-                medico: medico.nombre,
-                especialidad: medico.especialidad,
-                citas: medico.agenda.map(cita => ({
-                    paciente: cita.paciente ? cita.paciente.nombre : 'Paciente no encontrado', // Verificación en caso de que no exista el paciente
-                    fechaHora: cita.fechaHora ? cita.fechaHora.toLocaleString() : 'Fecha no disponible' // Verificación para fechas nulas
-                }))
-            };
-        });
+        const agendaMedicos = medicos.map(medico => ({
+            medico: medico.nombre,
+            especialidad: medico.especialidad,
+            citas: medico.agenda.map(cita => ({
+                paciente: cita.paciente ? cita.paciente.nombre : 'Paciente no encontrado',
+                fechaHora: cita.fechaHora ? cita.fechaHora.toLocaleString() : 'Fecha no disponible'
+            }))
+        }));
 
-        // Respondemos con la agenda en formato JSON
         res.json(agendaMedicos);
 
     } catch (error) {
@@ -314,8 +312,13 @@ app.get('/agenda', async (req, res) => {
     }
 });
 
-// Iniciar el servidor en el puerto 3000
+// Iniciar el servidor
 app.listen(port, () => {
+<<<<<<< HEAD
     console.log(`Servidor escuchando en http://localhost:${port}`);
 });
 >>>>>>> 2ebbcfb (primer commit)
+=======
+    console.log(`Servidor escuchando en el puerto ${port}`);
+});
+>>>>>>> ba09b72 (Guardando cambios locales antes de pull)
