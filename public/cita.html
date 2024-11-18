@@ -8,6 +8,11 @@
         body {background-image: url('https://raw.githubusercontent.com/DW-ST/CITMED/refs/heads/main/public/images/background.jpg'); background-size: cover; height: 100vh; text-align: center; font-family: Candara, sans-serif; }
         #formularioCita, #agenda, #nuevoUsuario { text-align:center;display: none; margin-top: 20px; }
         button {text-align: center; margin-top: 10px; padding: 10px; font-size: 16px; }
+        #especialidadFieldContainer.visible { visibility: visible; opacity: 1; transition: visibility 0s 0s, opacity 0.5s ease-in-out;} /* Transición suave */
+        #especialidadFieldContainer {visibility: hidden; opacity: 0; transition: visibility 0s 0.5s, opacity 0.5s ease-in-out;} /* El campo se oculta pero mantiene su espacio */
+               /* El campo se hace invisible */
+     /* Transición suave */
+
     </style>
 </head>
 <body>
@@ -52,9 +57,13 @@
         <label for="nombre">Nombre:</label>
         <input type="text" id="nombre"><br><br>
         <label for="telefono">Teléfono:</label>
-        <input type="text" id="telefono"><br><br>
-        <label for="especialidad">Especialidad:</label>
-        <input type="text" id="especialidad"><br><br>
+        <input type="number" id="telefono"><br><br>
+
+        <div id="especialidadFieldContainer">
+            <label for="especialidad" id="especialidadLabel">Especialidad:</label>
+            <input type="text" id="especialidad"><br><br>
+        </div>
+
         <button onclick="agregarUsuario()">Agregar Usuario</button>
         <button onclick="cancelarFormulario()">Cancelar</button>
     </div>
@@ -188,6 +197,33 @@ function ocultarFormularios() {
     document.getElementById('nuevoUsuario').style.display = 'none';
 }
 
+// Función para manejar el cambio en el tipo de usuario
+document.getElementById('tipoUsuario').addEventListener('change', function() {
+    var tipoUsuario = this.value;
+    var especialidadFieldContainer = document.getElementById('especialidadFieldContainer');
+
+    // Si el tipo de usuario es "paciente", ocultamos especialidad
+    if (tipoUsuario === 'paciente') {
+        especialidadFieldContainer.classList.remove('visible'); // Ocultamos el campo de especialidad
+    } else {
+        // Si el tipo de usuario es "médico", mostramos especialidad
+        especialidadFieldContainer.classList.add('visible'); // Mostramos el campo de especialidad
+    }
+});
+
+// Llamamos al código una vez para asegurarnos de que el formulario está correcto al cargar
+window.addEventListener('DOMContentLoaded', function() {
+    var tipoUsuario = document.getElementById('tipoUsuario').value;
+    var especialidadFieldContainer = document.getElementById('especialidadFieldContainer');
+    
+    // Si el tipo de usuario es "paciente", ocultamos especialidad al cargar
+    if (tipoUsuario === 'paciente') {
+        especialidadFieldContainer.classList.remove('visible'); // Ocultamos el campo de especialidad
+    } else {
+        especialidadFieldContainer.classList.add('visible'); // Mostramos el campo de especialidad
+    }
+});
+
 // Función para mostrar el formulario de nuevo usuario
 function mostrarFormularioNuevoUsuario() {
     ocultarFormularios();
@@ -197,12 +233,16 @@ function mostrarFormularioNuevoUsuario() {
 const { Paciente, Medico } = require('./db');
 
 // Función para agregar un nuevo usuario (paciente o médico)
+
+
 async function agregarUsuario() {
     const tipoUsuario = document.getElementById('tipoUsuario').value;
     const id = document.getElementById('id').value;
     const nombre = document.getElementById('nombre').value;
     const telefono = document.getElementById('telefono').value;
     const especialidad = document.getElementById('especialidad').value;
+
+    
 
     if (!id || !nombre || (tipoUsuario === 'paciente' && !telefono)) {
         alert('Por favor, completa todos los campos.');
