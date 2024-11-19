@@ -48,9 +48,6 @@ const medicoSchema = new mongoose.Schema({
     }]
 });
 
-// Modelos de Mongoose
-const Paciente = mongoose.model('Paciente', pacienteSchema);
-const Medico = mongoose.model('Medico', medicoSchema);
 
 // Ruta raíz (muestra un mensaje básico cuando se accede a la raíz)
 app.get('/', (req, res) => {
