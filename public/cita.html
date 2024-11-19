@@ -53,10 +53,12 @@
         <button onclick="verificarUsuario()">Verificar Usuario</button><br><br>
     </div>
 
-    <!-- Si el usuario está registrado, se mostrarán los siguientes campos -->
+<!-- Si el usuario está registrado, se mostrarán los siguientes campos -->
     <div id="formularioCitaDetalles" style="display: none;">
         <label for="medico">Médico:</label>
         <select id="medico"></select><br><br>
+        <label for="id">ID:</label>
+        <input type="text" id="id" readonly><br><br> <!-- Campo solo lectura -->
         <label for="paciente">Paciente:</label>
         <select id="paciente"></select><br><br>
         <label for="fechaHora">Fecha y Hora:</label>
@@ -110,6 +112,11 @@
     </div>
 
     <script>
+        
+        function mostrarFormularioCita() {
+    ocultarFormularios();  // Oculta cualquier otro formulario visible
+    document.getElementById('verificacionDocumento').style.display = 'block';  // Muestra el campo de verificación
+}
 // Función para verificar si el usuario ya existe antes de solicitar la cita
 async function verificarUsuario() {
     const documentoPaciente = document.getElementById('documentoPaciente').value;
@@ -126,22 +133,27 @@ async function verificarUsuario() {
             const errorData = await response.json();
             console.error('Error:', errorData);
             alert('Usuario no encontrado. Por favor, regístrate primero.');
-            mostrarFormularioNuevoUsuario();
+            mostrarFormularioNuevoUsuario(); // Redirige al formulario de nuevo usuario
             return;
         }
 
         const paciente = await response.json();
         if (paciente && paciente.id) {
             alert('Usuario validado. Ahora puedes solicitar una cita.');
+
             // Ocultar el formulario de verificación y mostrar el formulario de cita
             document.getElementById('verificacionDocumento').style.display = 'none';
             document.getElementById('formularioCitaDetalles').style.display = 'block';
 
-            // Cargar médicos y pacientes para completar el formulario
-            await cargarMedicosYPacientes();
+         // Cargar médicos y pacientes
+         await cargarMedicosYPacientes();
+
+         // Rellenar los datos del paciente en el formulario de cita
+         document.getElementById('id').value = paciente.id;
+         document.getElementById('paciente').value = paciente.id; // Preselecciona al paciente
         } else {
             alert('No se encontró al paciente con ese documento.');
-            mostrarFormularioNuevoUsuario();
+            mostrarFormularioNuevoUsuario(); // Si no se encuentra, redirige al formulario de nuevo usuario
         }
 
     } catch (error) {
