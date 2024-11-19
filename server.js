@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const path = require('path');
 
 // Inicializar la aplicación Express
-const express = require('express');
 const { connectDB, Paciente, Medico } = require('./db');  // Importar desde db.js
 
 const app = express();
