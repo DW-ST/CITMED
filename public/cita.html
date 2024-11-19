@@ -298,12 +298,16 @@ async function cargarMedicosYPacientes() {
         // Verificar si la respuesta es exitosa
         if (!response.ok) {
             const errorData = await response.json();
-            alert('Error: ' + errorData.message);
+            if (errorData.message.includes('Ya existe un paciente con el mismo tipo de ID y número de ID')) {
+                alert('Ya existe un paciente con el mismo tipo de ID y número de ID.');
+            } else {
+                alert('Error: ' + errorData.message);
+            }
             return;
         }
 
-        // Procesar la respuesta si es exitosa
-        const data = await response.json();
+      // Procesar la respuesta si es exitosa
+      const data = await response.json();
         alert(`Usuario creado exitosamente: ${data.nombre}`);
         ocultarFormularios();  // Ocultar formularios y regresar al menú
     } catch (error) {
