@@ -55,16 +55,29 @@
 
 <!-- Si el usuario está registrado, se mostrarán los siguientes campos -->
     <div id="formularioCitaDetalles" style="display: none;">
+        <label for="especialidad">Especialidad:</label>
+        <select id="especialidad" onchange="filtrarMedicosPorEspecialidad()">
+            <option value="">Seleccione especialidad</option>
+            <option value="Cardiología">Cardiología</option>
+            <option value="Pediatría">Pediatría</option>
+            <option value="Dermatología">Dermatología</option>
+        </select><br><br>
+
         <label for="medico">Médico:</label>
         <select id="medico"></select><br><br>
         <label for="id">ID:</label>
-        <input type="text" id="id" readonly><br><br> <!-- Campo solo lectura -->
+        <input type="text" id="id" disabled><br><br> <!-- Campo solo lectura -->
         <label for="paciente">Paciente:</label>
-        <select id="paciente"></select><br><br>
+        <select id="paciente" disabled></select><br><br>
         <label for="fechaHora">Fecha y Hora:</label>
         <input type="datetime-local" id="fechaHora"><br><br>
         <button onclick="confirmarCita()">Confirmar Cita</button>
         <button onclick="cancelarFormulario()">Cancelar</button>
+    </div>
+
+    <!-- Mensaje para cuando no haya agenda disponible -->
+    <div id="mensajeSinAgenda" style="display: none;">
+        Sin Agenda para la especialidad seleccionada.
     </div>
 
     <!-- Visualizar la Agenda -->
@@ -110,7 +123,10 @@
         <button onclick="agregarUsuario()">Agregar Usuario</button>
         <button onclick="cancelarFormulario()">Cancelar</button>
     </div>
-
+    <!-- Mensaje para cuando no haya agenda disponible -->
+        <div id="mensajeSinAgenda" style="display: none;">
+            Sin Agenda para la especialidad seleccionada.
+        </div>
     <script>
         
         function mostrarFormularioCita() {
@@ -192,6 +208,53 @@ async function cargarMedicosYPacientes() {
     } catch (error) {
         console.error('Error al cargar médicos y pacientes:', error);
         alert('Hubo un error al cargar los médicos o pacientes.');
+    }
+}
+
+// Filtrar médicos según la especialidad seleccionada
+async function filtrarMedicosPorEspecialidad() {
+    const especialidad = document.getElementById('especialidad').value;
+
+    // Verifica que se haya seleccionado una especialidad antes de proceder
+    if (!especialidad) {
+        alert('Por favor, selecciona una especialidad.');
+        return;
+    }
+
+    try {
+        // Solicitar médicos filtrados por especialidad desde el servidor
+        const medicosResponse = await fetch(`https://citmed.onrender.com/medicos?especialidad=${especialidad}`);
+        const medicosDb = await medicosResponse.json();
+
+        // Limpiar el select de médicos antes de agregar nuevas opciones
+        let medicoSelect = document.getElementById('medico');
+        medicoSelect.innerHTML = ''; // Limpiar el select
+
+        // Agregar una opción por defecto (inicialmente vacía o como un placeholder)
+        let optionDefault = document.createElement('option');
+        optionDefault.value = '';  // Valor vacío para la opción por defecto
+        optionDefault.textContent = 'Selecciona un médico';
+        medicoSelect.appendChild(optionDefault);
+
+        // Verifica si hay médicos para la especialidad seleccionada
+        if (medicosDb.length > 0) {
+            // Agregar médicos filtrados al select
+            medicosDb.forEach(medico => {
+                let option = document.createElement('option');
+                option.value = medico.id;
+                option.textContent = medico.nombre;
+                medicoSelect.appendChild(option);
+            });
+
+            // Ocultar el mensaje de "Sin Agenda" si hay médicos disponibles
+            document.getElementById('mensajeSinAgenda').style.display = 'none';  
+        } else {
+            // Mostrar el mensaje "Sin Agenda" si no hay médicos para la especialidad
+            document.getElementById('mensajeSinAgenda').style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error al filtrar médicos:', error);
+        alert('Hubo un error al filtrar los médicos.');
     }
 }
 

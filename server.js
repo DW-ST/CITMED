@@ -48,6 +48,23 @@ const medicoSchema = new mongoose.Schema({
     }]
 });
 
+// Ruta para obtener médicos por especialidad
+app.get('/medicos', async (req, res) => {
+    try {
+        const { especialidad } = req.query;  // Obtener especialidad desde los parámetros de la consulta
+
+        let query = {};
+        if (especialidad) {
+            query.especialidad = especialidad;
+        }
+
+        const medicos = await Medico.find(query);
+        res.json(medicos);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener médicos', error: error.message });
+    }
+});
+
 
 // Ruta raíz (muestra un mensaje básico cuando se accede a la raíz)
 app.get('/', (req, res) => {
