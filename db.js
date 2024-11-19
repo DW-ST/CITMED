@@ -21,11 +21,12 @@ const connectDB = async () => {
 
 // Esquema de Paciente
 const pacienteSchema = new mongoose.Schema({
-    id: { type: Number, required: true, unique: true },  // Asegúrate de que 'id' sea único
+    tipoID: { type: String, required: true },  // Asegúrate de tener 'tipoID'
+    id: { type: Number, required: true },  // 'id' es el número de identificación
     nombre: { type: String, required: true },
     telefono: { type: String, required: true },
-    direccion: { type: String, required: true }  // Se añadió el campo 'direccion'
-  });
+    direccion: { type: String, required: true }
+});
 // Esquema de Médico
 const medicoSchema = new mongoose.Schema({
   id: { type: Number, required: true },
@@ -36,6 +37,9 @@ const medicoSchema = new mongoose.Schema({
     fechaHora: { type: Date, required: true }
   }]
 });
+
+// Crear un índice único compuesto en los campos 'tipoID' y 'id'
+pacienteSchema.index({ tipoID: 1, id: 1 }, { unique: true });
 
 // Modelos de Mongoose
 const Paciente = mongoose.model('Paciente', pacienteSchema);

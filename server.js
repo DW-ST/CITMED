@@ -99,14 +99,24 @@ app.get('/pacientes/validar/:documentoPaciente', async (req, res) => {
 app.post('/pacientes', async (req, res) => {
     const { tipoID, id, nombre, telefono, direccion } = req.body;
 
-    if (!id || !nombre || !telefono || !direccion || !tipoID) {
+    // Verificar si todos los datos necesarios están presentes
+    if (!tipoID || !id || !nombre || !telefono || !direccion) {
         return res.status(400).json({ message: 'Faltan datos para agregar el paciente.' });
     }
 
     try {
+        // Verificar si ya existe un paciente con el mismo tipoID e id
+        const pacienteExistente = await Paciente.findOne({ tipoID, id });
+        
+        if (pacienteExistente) {
+            return res.status(400).json({ message: 'Ya existe un paciente con este tipo de ID y número de ID.' });
+        }
+
+        // Crear un nuevo paciente
         const paciente = new Paciente({ tipoID, id, nombre, telefono, direccion });
         await paciente.save();
         res.status(201).json(paciente);
+
     } catch (error) {
         console.error('Error al agregar paciente:', error);
         res.status(500).json({ message: 'Error al agregar paciente', error: error.message });
