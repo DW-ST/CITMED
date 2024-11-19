@@ -46,10 +46,12 @@
 </select><br><br>
 
     <!-- Campo para ingresar el número de documento -->
-    <label for="documentoPaciente">Número de Documento:</label>
-    <input type="number" id="documentoPaciente"><br><br>
+    <div id="verificacionDocumento" style="display: none;">
+        <label for="documentoPaciente">Número de Documento:</label>
+        <input type="number" id="documentoPaciente"><br><br>
 
-    <button onclick="verificarUsuario()">Verificar Usuario</button><br><br>
+        <button onclick="verificarUsuario()">Verificar Usuario</button><br><br>
+    </div>
 
     <!-- Si el usuario está registrado, se mostrarán los siguientes campos -->
     <div id="formularioCitaDetalles" style="display: none;">
@@ -108,8 +110,8 @@
     </div>
 
     <script>
-        // Función para verificar si el usuario ya existe antes de solicitar la cita
-        async function verificarUsuario() {
+// Función para verificar si el usuario ya existe antes de solicitar la cita
+async function verificarUsuario() {
     const documentoPaciente = document.getElementById('documentoPaciente').value;
 
     if (!documentoPaciente) {
@@ -131,6 +133,8 @@
         const paciente = await response.json();
         if (paciente && paciente.id) {
             alert('Usuario validado. Ahora puedes solicitar una cita.');
+            // Ocultar el formulario de verificación y mostrar el formulario de cita
+            document.getElementById('verificacionDocumento').style.display = 'none';
             document.getElementById('formularioCitaDetalles').style.display = 'block';
 
             // Cargar médicos y pacientes para completar el formulario
