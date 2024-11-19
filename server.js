@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -6,8 +5,14 @@ const bodyParser = require('body-parser');
 const path = require('path');
 
 // Inicializar la aplicación Express
+const express = require('express');
+const { connectDB, Paciente, Medico } = require('./db');  // Importar desde db.js
+
 const app = express();
-const port = process.env.PORT || 3000;  // Usar el puerto proporcionado por Render
+const port = process.env.PORT || 3000;
+
+// Conectar a la base de datos
+connectDB();
 
 // Middleware para manejar JSON y CORS
 app.use(bodyParser.json());
@@ -30,7 +35,8 @@ mongoose.connect(uri, {
 const pacienteSchema = new mongoose.Schema({
     id: Number,
     nombre: String,
-    telefono: String
+    telefono: String,
+    direccion: String
 });
 
 const medicoSchema = new mongoose.Schema({
@@ -58,7 +64,7 @@ app.get('/medicos', async (req, res) => {
         const medicos = await Medico.find();
         res.json(medicos);
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener médicos' });
+        res.status(500).json({ message: 'Error al obtener médicos', error: error.message });
     }
 });
 
@@ -67,15 +73,42 @@ app.get('/pacientes', async (req, res) => {
         const pacientes = await Paciente.find();
         res.json(pacientes);
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener pacientes' });
+        res.status(500).json({ message: 'Error al obtener pacientes', error: error.message });
+    }
+});
+
+// Ruta de validación de paciente
+app.get('/pacientes/validar/:documentoPaciente', async (req, res) => {
+    try {
+        const { documentoPaciente } = req.params;
+        console.log("Buscando paciente con id:", documentoPaciente);
+
+        // Convertir el valor de 'documentoPaciente' a un número
+        const paciente = await Paciente.findOne({ id: parseInt(documentoPaciente, 10) });
+
+        console.log("Paciente encontrado:", paciente);
+
+        if (!paciente) {
+            return res.status(404).json({ message: 'Paciente no encontrado' });
+        }
+
+        res.json(paciente);
+    } catch (error) {
+        console.error('Error al validar paciente:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
     }
 });
 
 // Ruta para agregar nuevo paciente
 app.post('/pacientes', async (req, res) => {
-    const { id, nombre, telefono } = req.body;
+    const { tipoID, id, nombre, telefono, direccion } = req.body;
+
+    if (!id || !nombre || !telefono || !direccion || !tipoID) {
+        return res.status(400).json({ message: 'Faltan datos para agregar el paciente.' });
+    }
+
     try {
-        const paciente = new Paciente({ id, nombre, telefono });
+        const paciente = new Paciente({ tipoID, id, nombre, telefono, direccion });
         await paciente.save();
         res.status(201).json(paciente);
     } catch (error) {
@@ -86,9 +119,14 @@ app.post('/pacientes', async (req, res) => {
 
 // Ruta para agregar nuevo médico
 app.post('/medicos', async (req, res) => {
-    const { id, nombre, especialidad } = req.body;
+    const { tipoID, id, nombre, especialidad } = req.body;
+
+    if (!id || !nombre || !especialidad || !tipoID) {
+        return res.status(400).json({ message: 'Faltan datos para agregar el médico.' });
+    }
+
     try {
-        const medico = new Medico({ id, nombre, especialidad, agenda: [] });
+        const medico = new Medico({ tipoID, id, nombre, especialidad, agenda: [] });
         await medico.save();
         res.status(201).json(medico);
     } catch (error) {
