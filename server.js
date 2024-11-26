@@ -23,12 +23,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Conexión a MongoDB
 const uri = 'mongodb+srv://labuenaesperanzasoporte:7uVLVDgRw7LRmw8E@cluster0.y72mk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
-mongoose.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log('Conectado a MongoDB Atlas'))
-.catch((err) => console.error('Error de conexión:', err));
 
 // Definir los esquemas de Mongoose
 const pacienteSchema = new mongoose.Schema({
@@ -39,32 +33,157 @@ const pacienteSchema = new mongoose.Schema({
 });
 
 const medicoSchema = new mongoose.Schema({
-    id: Number,
-    nombre: String,
-    especialidad: String,
-    agenda: [{
-        paciente: { type: mongoose.Schema.Types.ObjectId, ref: 'Paciente' },
-        fechaHora: Date
-    }]
+  id: Number,
+  nombre: String,
+  CodEsp: Number,
+  especialidad: String,
+  agenda: [{
+    paciente: { type: mongoose.Schema.Types.ObjectId, ref: 'Paciente' },
+    fechaHora: Date
+  }]
 });
 
-// Ruta para obtener médicos por especialidad
+// Ruta para obtener las fechas disponibles de un médico en un rango de fechas
+app.get('/medico/:id/agenda', async (req, res) => {
+    const medicoId = req.params.id;
+    const { fechaInicio, fechaFin } = req.query;  // fechas de inicio y fin del rango
+  
+    try {
+      // Convertir las fechas de inicio y fin a formato Date
+      const startDate = new Date(fechaInicio);
+      const endDate = new Date(fechaFin);
+  
+      // Buscar el médico por su ID
+      const medico = await Medico.findOne({ id: medicoId }).lean();  // .lean() para simplificar el objeto
+  
+      if (!medico) {
+        return res.status(404).json({ message: 'Médico no encontrado' });
+      }
+  
+      // Filtrar las citas de la agenda del médico que caen dentro del rango de fechas
+      const citas = medico.agenda.filter(cita => {
+        const citaFecha = new Date(cita.fechaHora);
+        return citaFecha >= startDate && citaFecha <= endDate;
+      });
+  
+      // Obtener las fechas ocupadas (no disponibles)
+      const fechasOcupadas = citas.map(cita => cita.fechaHora);
+  
+      // Crear un arreglo de fechas disponibles dentro del rango
+      let fechasDisponibles = [];
+      for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {
+        const fecha = new Date(d);
+        if (!fechasOcupadas.some(fechaOcupada => new Date(fechaOcupada).toDateString() === fecha.toDateString())) {
+          fechasDisponibles.push(fecha.toLocaleDateString());  // Solo fecha (sin hora)
+        }
+      }
+  
+      // Enviar las fechas disponibles al frontend
+      res.json({ fechasDisponibles });
+    } catch (error) {
+      console.error('Error al obtener la agenda:', error);
+      res.status(500).json({ message: 'Hubo un error al obtener la agenda.' });
+    }
+  });
+
+// Ruta para obtener médicos por especialidad o por ID
 app.get('/medicos', async (req, res) => {
     try {
-        const { especialidad } = req.query;  // Obtener especialidad desde los parámetros de la consulta
+        const especialidad = req.query.especialidad;
+        const id = req.query.id;
 
-        let query = {};
-        if (especialidad) {
-            query.especialidad = especialidad;
+        // Si se pasa un ID de médico, devolver ese médico
+        if (id) {
+            const medico = await Medico.findById(id).lean(); // Usamos .lean() para simplificar el objeto
+            if (!medico) {
+                return res.status(404).json({ message: 'Médico no encontrado' });
+            }
+            return res.json(medico);
         }
 
-        const medicos = await Medico.find(query);
-        res.json(medicos);
+        // Si se pasa una especialidad, buscar médicos con esa especialidad
+        if (especialidad) {
+            const medicos = await Medico.aggregate([
+                {
+                    $match: { especialidad: new RegExp("^" + especialidad + "$", "i") }
+                },
+                {
+                    $group: {
+                        _id: "$id",  // Agrupamos por el campo 'id' que es único para cada médico
+                        nombre: { $first: "$nombre" },
+                        especialidad: { $first: "$especialidad" },
+                        CodEspecialidad: { $first: "$CodEspecialidad" },             
+                        agenda: { $push: "$agenda" }  // Mantener todas las agendas
+                    }
+                },
+                {
+                    $project: { 
+                        _id: 0, 
+                        id: "$_id", 
+                        nombre: 1, 
+                        especialidad: 1, 
+                        CodEspecialidad: 1,                         
+                        agenda: { $reduce: {
+                            input: "$agenda",
+                            initialValue: [],
+                            in: { 
+                                $cond: {
+                                    if: { $in: ["$$this", "$$value"] },
+                                    then: "$$value",
+                                    else: { $concatArrays: ["$$value", ["$$this"]] }
+                                }
+                            }
+                        }}
+                    }
+                }
+            ]);
+
+            if (medicos.length === 0) {
+                return res.status(404).json({ message: 'No se encontraron médicos con esa especialidad.' });
+            }
+            return res.json(medicos);
+        }
+
+        // Si no se pasa ni ID ni especialidad, devolver todos los médicos sin duplicados
+        const medicos = await Medico.aggregate([
+            {
+                $group: {
+                    _id: "$id",  // Agrupamos por el campo 'id' que es único para cada médico
+                    nombre: { $first: "$nombre" },
+                    especialidad: { $first: "$especialidad" },
+                    CodEspecialidad: { $first: "$CodEspecialidad" },                    
+                    agenda: { $push: "$agenda" }  // Mantener todas las agendas
+                }
+            },
+            {
+                $project: { 
+                    _id: 0, 
+                    id: "$_id", 
+                    nombre: 1, 
+                    especialidad: 1, 
+                    CodEspecialidad: 1,                    
+                    agenda: { $reduce: {
+                        input: "$agenda",
+                        initialValue: [],
+                        in: { 
+                            $cond: {
+                                if: { $in: ["$$this", "$$value"] },
+                                then: "$$value",
+                                else: { $concatArrays: ["$$value", ["$$this"]] }
+                            }
+                        }
+                    }}
+                }
+            }
+        ]);
+
+        return res.json(medicos);
+
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener médicos', error: error.message });
+        console.error('Error al obtener médicos:', error);
+        res.status(500).json({ message: 'Hubo un error al obtener los médicos.' });
     }
 });
-
 
 // Ruta raíz (muestra un mensaje básico cuando se accede a la raíz)
 app.get('/', (req, res) => {
@@ -72,15 +191,6 @@ app.get('/', (req, res) => {
 });
 
 // Rutas para obtener médicos y pacientes
-app.get('/medicos', async (req, res) => {
-    try {
-        const medicos = await Medico.find();
-        res.json(medicos);
-    } catch (error) {
-        res.status(500).json({ message: 'Error al obtener médicos', error: error.message });
-    }
-});
-
 app.get('/pacientes', async (req, res) => {
     try {
         const pacientes = await Paciente.find();
@@ -138,24 +248,6 @@ app.post('/pacientes', async (req, res) => {
     }
 });
 
-// Ruta para agregar nuevo médico
-app.post('/medicos', async (req, res) => {
-    const { tipoID, id, nombre, especialidad } = req.body;
-
-    if (!id || !nombre || !especialidad || !tipoID) {
-        return res.status(400).json({ message: 'Faltan datos para agregar el médico.' });
-    }
-
-    try {
-        const medico = new Medico({ tipoID, id, nombre, especialidad, agenda: [] });
-        await medico.save();
-        res.status(201).json(medico);
-    } catch (error) {
-        console.error('Error al agregar médico:', error);
-        res.status(500).json({ message: 'Error al agregar médico', error: error.message });
-    }
-});
-
 // Ruta POST para confirmar la cita
 app.post('/confirmar-cita', async (req, res) => {
     const { medicoId, pacienteId, fechaHora } = req.body;
@@ -187,13 +279,15 @@ app.post('/confirmar-cita', async (req, res) => {
 // Ruta para obtener la agenda de todos los médicos
 app.get('/agenda', async (req, res) => {
     try {
-        const medicos = await Medico.find().populate('agenda.paciente'); // Asegúrate de que 'agenda.paciente' sea correcto
+        // Obtener todos los médicos con su agenda poblada
+        const medicos = await Medico.find().populate('agenda.paciente'); // Esto poblará el campo 'paciente' dentro de 'agenda'
 
         if (medicos.length === 0) {
             console.error('No se encontraron médicos en la base de datos');
             return res.status(404).json({ message: 'No se encontraron médicos en la base de datos' });
         }
 
+        // Mapear la información de cada médico y su agenda
         const agendaMedicos = medicos.map(medico => ({
             medico: medico.nombre,
             especialidad: medico.especialidad,
@@ -210,7 +304,6 @@ app.get('/agenda', async (req, res) => {
         res.status(500).json({ message: 'Hubo un error al obtener la agenda.', error: error.message });
     }
 });
-
 // Iniciar el servidor
 app.listen(port, () => {
     console.log(`Servidor escuchando en el puerto ${port}`);

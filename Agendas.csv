@@ -1,0 +1,63 @@
+﻿id;ConsAge;AgeFchIni;AgeFchFin;nombre;CodEspecialidad;especialidad
+10272418;10;2024-08-01 0:00;2024-12-31 0:00;MARIO  ALVARADO                         ;48;ENFERMERIA EN SALUD FAMILIAR                                          
+1085251628;19;2024-07-01 0:00;2024-11-30 0:00;LUIS CARLOS GOMEZ GOMEZ                 ;387;890266 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA INTERNA   
+1113686961;9;2024-10-15 0:00;2024-12-31 0:00;MARIA ISABEL RODRIGUEZ MONSALVE         ;382;MEDICINA GENERAL                                                      
+1116372239;33;2024-11-25 0:00;2024-11-29 0:00;NAZLY TATIANA TORRES CORREA             ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+1118285745;21;2024-11-26 0:00;2024-11-26 0:00;CLAUDIA XIMENA MUÑOZ PIEDRAHITA         ;602;RADIOLOGIA E IMAGENES DIAGNOSTICAS                                    
+1118285745;22;2024-12-03 0:00;2024-12-03 0:00;CLAUDIA XIMENA MUÑOZ PIEDRAHITA         ;602;RADIOLOGIA E IMAGENES DIAGNOSTICAS                                    
+1118285745;23;2024-12-17 0:00;2024-12-17 0:00;CLAUDIA XIMENA MUÑOZ PIEDRAHITA         ;602;RADIOLOGIA E IMAGENES DIAGNOSTICAS                                    
+1118287203;92;2024-12-02 0:00;2024-12-06 0:00;YURANI  ORTIZ                           ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+1118290382;42;2024-11-01 0:00;2024-11-30 0:00;CRISTHIAN FERNANDO RODRIGUEZ BRAVO      ;382;MEDICINA GENERAL                                                      
+1118290382;43;2024-12-02 0:00;2024-12-16 0:00;CRISTHIAN FERNANDO RODRIGUEZ BRAVO      ;382;MEDICINA GENERAL                                                      
+1118299501;17;2024-07-01 0:00;2024-12-31 0:00;ANDRES MATEO ARTEAGA RAFFAN             ;382;MEDICINA GENERAL                                                      
+1118303955;231;2024-11-29 0:00;2024-11-29 0:00;YISSEL ALEXANDRA ALEGRIA                ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+1118303955;232;2024-11-25 0:00;2024-11-28 0:00;YISSEL ALEXANDRA ALEGRIA                ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+1118303955;233;2024-12-02 0:00;2024-12-06 0:00;YISSEL ALEXANDRA ALEGRIA                ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+1118303955;234;2024-12-09 0:00;2024-12-13 0:00;YISSEL ALEXANDRA ALEGRIA                ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+1118303955;235;2024-12-16 0:00;2024-12-19 0:00;YISSEL ALEXANDRA ALEGRIA                ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+1130620864;143;2024-12-09 0:00;2024-12-12 0:00;DIANA MARCELA ORTIZ                     ;464;HIGIENISTA                                                            
+1130620864;144;2024-12-13 0:00;2024-12-13 0:00;DIANA MARCELA ORTIZ                     ;464;HIGIENISTA                                                            
+1130640404;87;2024-11-29 0:00;2024-11-29 0:00;NATHALIA MARYENI ESCOBAR MATERON        ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+1144033278;23;2024-07-01 0:00;2024-11-30 0:00;JENNY LIZETH TORRES PERLAZA             ;450;NUTRICION -CONSULTA 890206 - CONTROL 890306                           
+123456;4;2024-01-01 0:00;2024-12-31 0:00;MEDICO  VIRTUAL                         ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+14622131;20;2024-07-01 0:00;2024-11-30 0:00;JONATHAN  JARAMILLO GARCIA              ;382;MEDICINA GENERAL                                                      
+16284457;26;2121-01-01 0:00;2121-01-02 0:00;JUAN CARLOS MONTAÑO                     ;341;GINECOLOGIA Y OBSTETRICIA  - CUPS- 890250                             
+16284457;39;2024-07-01 0:00;2024-11-30 0:00;JUAN CARLOS MONTAÑO                     ;341;GINECOLOGIA Y OBSTETRICIA  - CUPS- 890250                             
+16452044;5;2024-07-01 0:00;2024-11-30 0:00;MESIAS  HOYOS JOAQUI                    ;786;PROGRAMA AIEPI                                                        
+16452044;6;2024-12-01 0:00;2024-12-31 0:00;MESIAS  HOYOS JOAQUI                    ;786;PROGRAMA AIEPI                                                        
+16458662;37;2024-07-01 0:00;2024-11-30 0:00;GUSTAVO ADOLFO BEJARANO SANABRIA        ;385;890263-CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA FAMILIAR  
+16537207;5;2024-07-02 0:00;2024-12-31 0:00;FELIPE EDUARDO TENORIO SALOMON          ;48;ENFERMERIA EN SALUD FAMILIAR                                          
+16631849;48;2024-02-17 0:00;2024-11-30 0:00;MARIO  POMBO PENAGOS                    ;382;MEDICINA GENERAL                                                      
+16642005;376;2024-11-25 0:00;2024-11-29 0:00;URIEL ANGEL GUERRERO                    ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+16642005;377;2024-12-02 0:00;2024-12-06 0:00;URIEL ANGEL GUERRERO                    ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+16642005;378;2024-12-09 0:00;2024-12-13 0:00;URIEL ANGEL GUERRERO                    ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+16642005;379;2024-12-16 0:00;2024-12-20 0:00;URIEL ANGEL GUERRERO                    ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+16642005;380;2024-12-23 0:00;2024-12-26 0:00;URIEL ANGEL GUERRERO                    ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+16777312;554;2024-11-25 0:00;2024-11-29 0:00;ANUAR  LOPEZ                            ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+16777312;555;2024-12-02 0:00;2024-12-02 0:00;ANUAR  LOPEZ                            ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+16777312;556;2024-12-03 0:00;2024-12-04 0:00;ANUAR  LOPEZ                            ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+16777312;557;2024-12-05 0:00;2024-12-05 0:00;ANUAR  LOPEZ                            ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+16777312;558;2024-12-06 0:00;2024-12-06 0:00;ANUAR  LOPEZ                            ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+16777312;559;2024-12-09 0:00;2024-12-13 0:00;ANUAR  LOPEZ                            ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+16986708;50;2024-07-01 0:00;2024-11-30 0:00;GUSTAVO  POLANCO RODRIGUEZ              ;382;MEDICINA GENERAL                                                      
+29399969;5;2024-07-01 0:00;2024-12-31 0:00;YOLIMA  CASTILLO CRUZ                   ;783;PROGRAMA IAMI                                                         
+29399969;5;2024-07-01 0:00;2024-12-31 0:00;YOLIMA  CASTILLO CRUZ                   ;786;PROGRAMA AIEPI                                                        
+29973762;684;2024-11-26 0:00;2024-11-29 0:00;KAROL  ORTIZ SATIZABAL                  ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+29973762;685;2024-12-02 0:00;2024-12-06 0:00;KAROL  ORTIZ SATIZABAL                  ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+29973762;686;2024-12-09 0:00;2024-12-13 0:00;KAROL  ORTIZ SATIZABAL                  ;461;ODONTOLOGIA INTEGRAL DEL ADULTO                                       
+31477354;1;2024-01-01 0:00;2024-12-31 0:00;NORMA CELI BARRETO                      ;661;890209-CONSULTA DE PRIMERA VEZ POR TRABAJO SOCIAL                     
+31481901;19;2024-11-26 0:00;2024-11-26 0:00;LORENA  HURTADO MURILLO                 ;661;890209-CONSULTA DE PRIMERA VEZ POR TRABAJO SOCIAL                     
+31485964;72;2024-11-29 0:00;2024-11-29 0:00;NATALIA  MONTENEGRO CASTAÑEDA           ;382;MEDICINA GENERAL                                                      
+31485964;72;2024-11-29 0:00;2024-11-29 0:00;NATALIA  MONTENEGRO CASTAÑEDA           ;786;PROGRAMA AIEPI                                                        
+31485964;78;2024-11-30 0:00;2024-11-30 0:00;NATALIA  MONTENEGRO CASTAÑEDA           ;382;MEDICINA GENERAL                                                      
+31983624;34;2024-07-01 0:00;2024-11-30 0:00;MARIA FERNANDA ESCOBAR                  ;382;MEDICINA GENERAL                                                      
+59705618;28;2121-01-01 0:00;2121-01-31 0:00;CATHERINA DE LOS ANGELES DELGADO        ;382;MEDICINA GENERAL                                                      
+59705618;36;2024-07-02 0:00;2024-12-31 0:00;CATHERINA DE LOS ANGELES DELGADO        ;382;MEDICINA GENERAL                                                      
+66652032;2;2024-07-01 0:00;2024-12-31 0:00;PATRICIA  PEDRAZA PLAZA                 ;794;RUTA INFANTIL                                                         
+66769829;31;2024-07-01 0:00;2024-12-31 0:00;MARISOL  SEPULVEDA                      ;382;MEDICINA GENERAL                                                      
+85472966;18;2024-11-01 0:00;2024-11-30 0:00;RICHARD YAMILL GONZALEZ CUELLO          ;382;MEDICINA GENERAL                                                      
+85472966;19;2024-12-18 0:00;2024-12-18 0:00;RICHARD YAMILL GONZALEZ CUELLO          ;382;MEDICINA GENERAL                                                      
+85472966;20;2024-12-19 0:00;2024-12-19 0:00;RICHARD YAMILL GONZALEZ CUELLO          ;382;MEDICINA GENERAL                                                      
+85472966;21;2024-12-20 0:00;2024-12-20 0:00;RICHARD YAMILL GONZALEZ CUELLO          ;382;MEDICINA GENERAL                                                      
+85472966;22;2024-12-26 0:00;2024-12-26 0:00;RICHARD YAMILL GONZALEZ CUELLO          ;382;MEDICINA GENERAL                                                      
+85472966;23;2024-12-27 0:00;2024-12-27 0:00;RICHARD YAMILL GONZALEZ CUELLO          ;382;MEDICINA GENERAL                                                      

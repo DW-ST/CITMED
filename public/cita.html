@@ -12,7 +12,7 @@
             text-align: center;
             font-family: Candara, sans-serif;
         }
-        #formularioCita, #agenda, #nuevoUsuario {
+        #formularioCita, #agenda, #nuevoUsuario, #verificacionDocumento {
             text-align: center;
             display: none;
             margin-top: 20px;
@@ -43,8 +43,7 @@
         <button onclick="mostrarAgenda()">Ver Agenda</button>
         <button onclick="mostrarFormularioNuevoUsuario()">Nuevo Usuario</button>
     </div>
-</select><br><br>
-
+    
     <!-- Campo para ingresar el número de documento -->
     <div id="verificacionDocumento" style="display: none;">
         <label for="documentoPaciente">Número de Documento:</label>
@@ -53,14 +52,11 @@
         <button onclick="verificarUsuario()">Verificar Usuario</button><br><br>
     </div>
 
-<!-- Si el usuario está registrado, se mostrarán los siguientes campos -->
+    <!-- Si el usuario está registrado, se mostrarán los siguientes campos -->
     <div id="formularioCitaDetalles" style="display: none;">
         <label for="especialidad">Especialidad:</label>
         <select id="especialidad" onchange="filtrarMedicosPorEspecialidad()">
             <option value="">Seleccione especialidad</option>
-            <option value="Cardiología">Cardiología</option>
-            <option value="Pediatría">Pediatría</option>
-            <option value="Dermatología">Dermatología</option>
         </select><br><br>
 
         <label for="medico">Médico:</label>
@@ -90,12 +86,7 @@
     <!-- Formulario para Nuevo Usuario -->
     <div id="nuevoUsuario">
         <h2>Nuevo Usuario</h2>
-        <label for="tipoUsuario">Tipo de Usuario:</label>
-        <select id="tipoUsuario">
-            <option value="paciente">Paciente</option>
-            <option value="medico">Médico</option>
-        </select><br><br>
-
+        
         <label for="tipoID">Tipo de ID:</label>
         <select id="tipoID">
             <option value="cedula_ciudadania">Cédula de Ciudadanía</option>
@@ -115,285 +106,390 @@
         <label for="Dirección">Dirección:</label>
         <input type="text" id="Dirección"><br><br>
 
-        <div id="especialidadFieldContainer">
-            <label for="especialidad" id="especialidadLabel">Especialidad:</label>
-            <input type="text" id="especialidad"><br><br>
-        </div>
-
         <button onclick="agregarUsuario()">Agregar Usuario</button>
         <button onclick="cancelarFormulario()">Cancelar</button>
     </div>
-    <!-- Mensaje para cuando no haya agenda disponible -->
-        <div id="mensajeSinAgenda" style="display: none;">
-            Sin Agenda para la especialidad seleccionada.
-        </div>
-    <script>
-        
-        function mostrarFormularioCita() {
-    ocultarFormularios();  // Oculta cualquier otro formulario visible
-    document.getElementById('verificacionDocumento').style.display = 'block';  // Muestra el campo de verificación
-}
-// Función para verificar si el usuario ya existe antes de solicitar la cita
-async function verificarUsuario() {
-    const documentoPaciente = document.getElementById('documentoPaciente').value;
 
-    if (!documentoPaciente) {
-        alert('Por favor, ingresa el número de documento.');
-        return;
-    }
+    <script>
+        async function limitarFechaYHora() {
+    const medicoId = document.getElementById('medicoSelect').value;
+
+    if (!medicoId) return;
 
     try {
-        const response = await fetch(`https://citmed.onrender.com/pacientes/validar/${documentoPaciente}`);
+      // Hacer la solicitud al backend para obtener las fechas de inicio y fin de la agenda
+      const response = await fetch(`/medico-agenda?medicoId=${medicoId}`);
+      const data = await response.json();
+
+      if (data.fechaInicio && data.fechaFin) {
+        // Limitar el campo de fecha y hora dentro del rango de la agenda
+        const fechaInicio = new Date(data.fechaInicio);
+        const fechaFin = new Date(data.fechaFin);
+
+        // Convertir las fechas a formato adecuado para el campo datetime-local
+        const fechaInicioStr = fechaInicio.toISOString().slice(0, 16); // ISO string sin los segundos
+        const fechaFinStr = fechaFin.toISOString().slice(0, 16); // ISO string sin los segundos
+
+        // Establecer los atributos min y max para el campo de fecha y hora
+        document.getElementById('fechaHora').setAttribute('min', fechaInicioStr);
+        document.getElementById('fechaHora').setAttribute('max', fechaFinStr);
+      }
+    } catch (error) {
+      console.error('Error al obtener las fechas de la agenda del médico:', error);
+    }
+  }
+        function mostrarFormularioCita() {
+            ocultarFormularios();  // Oculta cualquier otro formulario visible
+            document.getElementById('verificacionDocumento').style.display = 'block';  // Muestra el campo de verificación
+        }
+
+        // Función para verificar si el usuario ya existe antes de solicitar la cita
+        async function verificarUsuario() {
+            const documentoPaciente = document.getElementById('documentoPaciente').value;
+
+            if (!documentoPaciente) {
+                alert('Por favor, ingresa el número de documento.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://citmed.onrender.com/pacientes/validar/${documentoPaciente}`);
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Error:', errorData);
+                    alert('Usuario no encontrado. Por favor, regístrate primero.');
+                    mostrarFormularioNuevoUsuario(); // Redirige al formulario de nuevo usuario
+                    return;
+                }
+
+                const paciente = await response.json();
+                if (paciente && paciente.id) {
+                    alert('Usuario validado. Ahora puedes solicitar una cita.');
+
+                    // Ocultar el formulario de verificación y mostrar el formulario de cita
+                    document.getElementById('verificacionDocumento').style.display = 'none';
+                    document.getElementById('formularioCitaDetalles').style.display = 'block';
+
+                    // Cargar médicos y pacientes
+                    await cargarMedicosYPacientes();
+
+                    // Rellenar los datos del paciente en el formulario de cita
+                    document.getElementById('id').value = paciente.id;
+                    document.getElementById('paciente').value = paciente.id; // Preselecciona al paciente
+                } else {
+                    alert('No se encontró al paciente con ese documento.');
+                    mostrarFormularioNuevoUsuario(); // Si no se encuentra, redirige al formulario de nuevo usuario
+                }
+
+            } catch (error) {
+                console.error('Error al verificar usuario:', error);
+                alert('Hubo un error al verificar el usuario. Verifica que el servidor esté disponible.');
+            }
+        }
+
+        // Cargar médicos y pacientes desde la base de datos
+        async function cargarMedicosYPacientes() {
+            try {
+                const medicosResponse = await fetch('https://citmed.onrender.com/medicos');
+                const pacientesResponse = await fetch('https://citmed.onrender.com/pacientes');
+
+                const medicosDb = await medicosResponse.json();
+                const pacientesDb = await pacientesResponse.json();
+
+                // Rellenar las opciones de médicos
+                let medicoSelect = document.getElementById('medico');
+                medicoSelect.innerHTML = '';
+                medicosDb.forEach(medico => {
+                    let option = document.createElement('option');
+                    option.value = medico.id;
+                    option.textContent = medico.nombre;
+                    medicoSelect.appendChild(option);
+                });
+
+                // Rellenar las opciones de pacientes
+                let pacienteSelect = document.getElementById('paciente');
+                pacienteSelect.innerHTML = '';
+                pacientesDb.forEach(paciente => {
+                    let option = document.createElement('option');
+                    option.value = paciente.id;
+                    option.textContent = paciente.nombre;
+                    pacienteSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error al cargar médicos y pacientes:', error);
+                alert('Hubo un error al cargar los médicos o pacientes.');
+            }
+        }
+
+        // Función para cargar las especialidades desde la API /medicos
+async function cargarEspecialidades() {
+    try {
+        const response = await fetch('https://citmed.onrender.com/medicos'); // URL de tu API que obtiene los médicos
 
         if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Error:', errorData);
-            alert('Usuario no encontrado. Por favor, regístrate primero.');
-            mostrarFormularioNuevoUsuario(); // Redirige al formulario de nuevo usuario
-            return;
+            console.error('Error al obtener los médicos:', response.statusText);
+            throw new Error('Error al obtener los médicos');
         }
 
-        const paciente = await response.json();
-        if (paciente && paciente.id) {
-            alert('Usuario validado. Ahora puedes solicitar una cita.');
+        const medicos = await response.json(); // Respuesta de la API
 
-            // Ocultar el formulario de verificación y mostrar el formulario de cita
-            document.getElementById('verificacionDocumento').style.display = 'none';
-            document.getElementById('formularioCitaDetalles').style.display = 'block';
+        // Obtener todas las especialidades únicas de los médicos
+        const especialidades = new Set();
+        medicos.forEach(medico => {
+            if (medico.especialidad) {
+                especialidades.add(medico.especialidad);
+            }
+        });
 
-         // Cargar médicos y pacientes
-         await cargarMedicosYPacientes();
+        // Poblar el select con las especialidades obtenidas
+        const selectEspecialidad = document.getElementById('especialidad');
+        selectEspecialidad.innerHTML = '<option value="">Seleccione especialidad</option>'; // Limpiar las opciones anteriores
 
-         // Rellenar los datos del paciente en el formulario de cita
-         document.getElementById('id').value = paciente.id;
-         document.getElementById('paciente').value = paciente.id; // Preselecciona al paciente
-        } else {
-            alert('No se encontró al paciente con ese documento.');
-            mostrarFormularioNuevoUsuario(); // Si no se encuentra, redirige al formulario de nuevo usuario
-        }
+        especialidades.forEach(especialidad => {
+            const option = document.createElement('option');
+            option.value = especialidad;
+            option.textContent = especialidad;
+            selectEspecialidad.appendChild(option);
+        });
 
     } catch (error) {
-        console.error('Error al verificar usuario:', error);
-        alert('Hubo un error al verificar el usuario. Verifica que el servidor esté disponible.');
+        console.error('Error al cargar especialidades:', error);
+        alert('Hubo un error al cargar las especialidades.');
     }
 }
 
-async function cargarMedicosYPacientes() {
-    try {
-        const medicosResponse = await fetch('https://citmed.onrender.com/medicos');
-        const pacientesResponse = await fetch('https://citmed.onrender.com/pacientes');
+// Llamar a la función para cargar las especialidades cuando se cargue la página
+window.onload = cargarEspecialidades;
 
-        const medicosDb = await medicosResponse.json();
-        const pacientesDb = await pacientesResponse.json();
+// Filtrar médicos por especialidad
+// Deshabilitar el select de médicos al inicio
+document.getElementById('medico').disabled = true;
 
-        // Rellenar las opciones de médicos
-        let medicoSelect = document.getElementById('medico');
-        medicoSelect.innerHTML = '';
-        medicosDb.forEach(medico => {
-            let option = document.createElement('option');
-            option.value = medico.id;
-            option.textContent = medico.nombre;
-            medicoSelect.appendChild(option);
-        });
-
-        // Rellenar las opciones de pacientes
-        let pacienteSelect = document.getElementById('paciente');
-        pacienteSelect.innerHTML = '';
-        pacientesDb.forEach(paciente => {
-            let option = document.createElement('option');
-            option.value = paciente.id;
-            option.textContent = paciente.nombre;
-            pacienteSelect.appendChild(option);
-        });
-    } catch (error) {
-        console.error('Error al cargar médicos y pacientes:', error);
-        alert('Hubo un error al cargar los médicos o pacientes.');
-    }
-}
-
-// Filtrar médicos según la especialidad seleccionada
 async function filtrarMedicosPorEspecialidad() {
     const especialidad = document.getElementById('especialidad').value;
 
-    // Verifica que se haya seleccionado una especialidad antes de proceder
     if (!especialidad) {
         alert('Por favor, selecciona una especialidad.');
+        document.getElementById('medico').disabled = true;  // Deshabilitar el select de médicos si no hay especialidad seleccionada
         return;
     }
 
+    console.log('Especialidad seleccionada:', especialidad);  // Verifica que la especialidad este correctamente seleccionada
+
     try {
-        // Solicitar médicos filtrados por especialidad desde el servidor
-        const medicosResponse = await fetch(`https://citmed.onrender.com/medicos?especialidad=${especialidad}`);
+        // Asegúrate de que se está pasando el valor de especialidad correctamente
+        const medicosResponse = await fetch(`https://citmed.onrender.com/medicos?especialidad=${encodeURIComponent(especialidad)}`);
+        
+        if (!medicosResponse.ok) {
+            throw new Error('Error en la respuesta de la API');
+        }
+
         const medicosDb = await medicosResponse.json();
+        console.log('Médicos recibidos:', medicosDb);  // Verifica los datos recibidos
 
-        // Limpiar el select de médicos antes de agregar nuevas opciones
         let medicoSelect = document.getElementById('medico');
-        medicoSelect.innerHTML = ''; // Limpiar el select
+        medicoSelect.innerHTML = '';  // Limpiar el select de médicos
 
-        // Agregar una opción por defecto (inicialmente vacía o como un placeholder)
         let optionDefault = document.createElement('option');
-        optionDefault.value = '';  // Valor vacío para la opción por defecto
+        optionDefault.value = '';
         optionDefault.textContent = 'Selecciona un médico';
         medicoSelect.appendChild(optionDefault);
 
-        // Verifica si hay médicos para la especialidad seleccionada
+        // Mostrar todos los médicos disponibles para esa especialidad
         if (medicosDb.length > 0) {
-            // Agregar médicos filtrados al select
             medicosDb.forEach(medico => {
+                // Verificar que el nombre del médico esté presente
+                let nombreMedico = medico.nombre || 'Nombre desconocido';
+
                 let option = document.createElement('option');
                 option.value = medico.id;
-                option.textContent = medico.nombre;
+                option.textContent = nombreMedico;
                 medicoSelect.appendChild(option);
             });
 
-            // Ocultar el mensaje de "Sin Agenda" si hay médicos disponibles
-            document.getElementById('mensajeSinAgenda').style.display = 'none';  
+            // Habilitar el select de médicos si hay médicos disponibles
+            document.getElementById('medico').disabled = false;
         } else {
-            // Mostrar el mensaje "Sin Agenda" si no hay médicos para la especialidad
             document.getElementById('mensajeSinAgenda').style.display = 'block';
+            document.getElementById('medico').disabled = true;  // Deshabilitar si no hay médicos
         }
     } catch (error) {
         console.error('Error al filtrar médicos:', error);
         alert('Hubo un error al filtrar los médicos.');
     }
 }
-
         // Confirmar la cita
         async function confirmarCita() {
-            const medicoId = document.getElementById('medico').value;
-            const pacienteId = document.getElementById('paciente').value;
-            const fechaHora = document.getElementById('fechaHora').value;
+    // Obtener los valores de los campos
+    const medicoId = document.getElementById('medico').value;
+    const pacienteId = document.getElementById('paciente').value;
+    const fechaHora = document.getElementById('fechaHora').value;
 
-            if (!medicoId || !pacienteId || !fechaHora) {
+    // Validación de campos
+    if (!medicoId || !pacienteId || !fechaHora) {
+        alert('Por favor, completa todos los campos.');  // Verificar si los campos están vacíos
+        return;
+    }
+
+    // Convertir la fecha y hora seleccionada a un objeto Date
+    const fecha = new Date(fechaHora);
+    const hora = fecha.getHours();
+
+    // Verificar si la hora está dentro del rango permitido
+    if (!((hora >= 7 && hora < 12) || (hora >= 13 && hora < 19))) {
+        alert('La hora seleccionada no está dentro del horario disponible. El horario permitido es de 7:00 AM a 12:00 PM y de 1:00 PM a 7:00 PM.');
+        return;
+    }
+
+    try {
+        // Crear el objeto de la cita
+        const confirmarcita = { medicoId, pacienteId, fechaHora };
+
+        // Realizar la solicitud a la API
+        const response = await fetch('https://citmed.onrender.com/confirmar-cita', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(confirmarcita)
+        });
+
+        // Verificar si la respuesta no es exitosa
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert('Error: ' + errorData.message);
+            return;
+        }
+
+        // Si la respuesta es exitosa, obtener los datos y mostrar el mensaje
+        const data = await response.json();
+        alert(data.message);  // Mostrar mensaje de éxito
+        ocultarFormularios();  // Ocultar los formularios después de la confirmación
+
+    } catch (error) {
+        // Manejo de errores
+        console.error('Error al confirmar cita:', error);
+        alert('Hubo un error al confirmar la cita: ' + error.message);  // Mostrar mensaje de error en caso de fallo
+    }
+}
+
+        // Agregar un nuevo paciente
+        async function agregarUsuario() {
+            const tipoID = document.getElementById('tipoID').value;
+            const id = document.getElementById('id').value;
+            const nombre = document.getElementById('nombre').value;
+            const telefono = document.getElementById('telefono').value;
+            const direccion = document.getElementById('Dirección').value;
+
+            if (!id || !nombre || !telefono || !direccion || !tipoID) {
                 alert('Por favor, completa todos los campos.');
                 return;
             }
 
+            const nuevoUsuario = {
+                tipoID,
+                id,
+                nombre,
+                telefono,
+                direccion
+            };
+
             try {
-                const confirmarcita = { medicoId, pacienteId, fechaHora };
-                const response = await fetch('https://citmed.onrender.com/confirmar-cita', {
+                const url = 'https://citmed.onrender.com/pacientes';
+
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(confirmarcita)
+                    body: JSON.stringify(nuevoUsuario)
                 });
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    alert('Error: ' + errorData.message);
+                    if (errorData.message.includes('Ya existe un paciente con el mismo tipo de ID y número de ID')) {
+                        alert('Ya existe un paciente con el mismo tipo de ID y número de ID.');
+                    } else {
+                        alert('Error: ' + errorData.message);
+                    }
                     return;
                 }
 
                 const data = await response.json();
-                alert(data.message);
+                alert(`Usuario creado exitosamente: ${data.nombre}`);
                 ocultarFormularios();
             } catch (error) {
-                console.error('Error al confirmar cita:', error);
-                alert('Hubo un error al confirmar la cita: ' + error.message);
+                console.error('Error al agregar usuario:', error);
+                alert('Hubo un error al agregar el usuario.');
             }
         }
 
-        // Función para mostrar la agenda
+        // Función para ocultar todos los formularios
+        function ocultarFormularios() {
+            document.getElementById('formularioCitaDetalles').style.display = 'none';
+            document.getElementById('agenda').style.display = 'none';
+            document.getElementById('nuevoUsuario').style.display = 'none';
+            document.getElementById('verificacionDocumento').style.display = 'none';
+        }
+
+        // Mostrar la agenda
         async function mostrarAgenda() {
-            ocultarFormularios();
-            document.getElementById('agenda').style.display = 'block';
+    ocultarFormularios();
+    document.getElementById('agenda').style.display = 'block';
 
-            const agendaLista = document.getElementById('agendaLista');
-            agendaLista.innerHTML = '';
+    try {
+        const response = await fetch('https://citmed.onrender.com/agenda');
 
-            try {
-                const response = await fetch('https://citmed.onrender.com/agenda');
-                if (!response.ok) {
-                    throw new Error('No se pudo cargar la agenda desde el servidor.');
-                }
+        // Verificar si la respuesta es exitosa
+        if (!response.ok) {
+            console.error('Error al obtener la agenda:', response.statusText);
+            throw new Error('Error al obtener la agenda');
+        }
 
-                const agendaData = await response.json();
-                agendaData.forEach(medico => {
-                    const li = document.createElement('li');
-                    li.textContent = `Médico: ${medico.medico} (${medico.especialidad})`;
+        const agenda = await response.json();
 
-                    const citas = medico.citas.map(cita => `${cita.paciente} - ${cita.fechaHora}`).join(', ');
-                    li.innerHTML += `<br><strong>Citas: </strong>${citas}`;
+        // Verificar qué se recibe exactamente
+        console.log('Agenda recibida:', agenda);
+
+        // Comprobar si la agenda tiene datos
+        if (agenda && agenda.length > 0) {
+            let agendaLista = document.getElementById('agendaLista');
+            agendaLista.innerHTML = '';  // Limpiar cualquier contenido previo
+
+            // Mostrar las citas en la agenda
+            agenda.forEach(medico => {  // Ahora iteramos sobre los médicos
+                medico.citas.forEach(cita => {  // Iteramos sobre las citas del médico
+
+                    let li = document.createElement('li');
+
+                    // Ajustar el acceso a 'medico' y 'paciente'
+                    const medicoNombre = medico.medico || 'Sin médico asignado';
+                    const pacienteNombre = cita.paciente || 'Paciente no asignado';
+
+                    // Asegurarse de que la fecha se muestre correctamente
+                    const fechaHora = cita.fechaHora ? new Date(cita.fechaHora).toLocaleString() : 'Fecha no disponible';
+
+                    li.textContent = `${fechaHora} - Médico: ${medicoNombre} - Paciente: ${pacienteNombre}`;
                     agendaLista.appendChild(li);
                 });
-            } catch (error) {
-                alert('Error al cargar la agenda: ' + error.message);
-            }
+            });
+        } else {
+            alert('No hay citas en la agenda.');
         }
 
-        // Mostrar formulario para nuevo usuario
+    } catch (error) {
+        console.error('Error al cargar la agenda:', error);
+        alert('Hubo un error al cargar la agenda. Por favor, inténtalo de nuevo más tarde.');
+    }
+}
+
+        // Mostrar el formulario para agregar un nuevo usuario
         function mostrarFormularioNuevoUsuario() {
             ocultarFormularios();
             document.getElementById('nuevoUsuario').style.display = 'block';
         }
 
-        // Cancelar cualquier formulario y regresar al menú
+        // Cancelar el formulario y volver al menú
         function cancelarFormulario() {
             ocultarFormularios();
         }
-
-        // Ocultar todos los formularios
-        function ocultarFormularios() {
-            document.getElementById('formularioCitaDetalles').style.display = 'none';
-            document.getElementById('agenda').style.display = 'none';
-            document.getElementById('nuevoUsuario').style.display = 'none';
-        }
-
-        // Función para agregar un nuevo usuario
-        async function agregarUsuario() {
-    const tipoUsuario = document.getElementById('tipoUsuario').value;
-    const tipoID = document.getElementById('tipoID').value;  // Mantener tipoID
-    const id = document.getElementById('id').value;
-    const nombre = document.getElementById('nombre').value;
-    const telefono = document.getElementById('telefono').value;
-    const direccion = document.getElementById('Dirección').value;
-    const especialidad = tipoUsuario === 'medico' ? document.getElementById('especialidad').value : null;
-
-    // Validar que los campos obligatorios estén completos
-    if (!id || !nombre || !telefono || !direccion || !tipoID) {
-        alert('Por favor, completa todos los campos.');
-        return;
-    }
-
-    const nuevoUsuario = {
-        tipoUsuario,
-        tipoID,  // Agregar tipoID al cuerpo de la solicitud
-        id,
-        nombre,
-        telefono,
-        direccion,
-        especialidad: especialidad || ''  // Solo si es médico
-    };
-
-    try {
-        // Determinar la URL de acuerdo al tipo de usuario
-        const url = tipoUsuario === 'paciente' ? 'https://citmed.onrender.com/pacientes' : 'https://citmed.onrender.com/medicos';
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(nuevoUsuario)
-        });
-
-        // Verificar si la respuesta es exitosa
-        if (!response.ok) {
-            const errorData = await response.json();
-            if (errorData.message.includes('Ya existe un paciente con el mismo tipo de ID y número de ID')) {
-                alert('Ya existe un paciente con el mismo tipo de ID y número de ID.');
-            } else {
-                alert('Error: ' + errorData.message);
-            }
-            return;
-        }
-
-      // Procesar la respuesta si es exitosa
-      const data = await response.json();
-        alert(`Usuario creado exitosamente: ${data.nombre}`);
-        ocultarFormularios();  // Ocultar formularios y regresar al menú
-    } catch (error) {
-        console.error('Error al agregar usuario:', error);
-        alert('Hubo un error al agregar el usuario.');
-    }
-}
     </script>
 </body>
 </html>

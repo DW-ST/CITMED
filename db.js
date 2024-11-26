@@ -29,8 +29,9 @@ const pacienteSchema = new mongoose.Schema({
 });
 // Esquema de Médico
 const medicoSchema = new mongoose.Schema({
-  id: { type: Number, required: true },
-  nombre: { type: String, required: true },
+  id: {type: Number, required: true },  
+  nombre: {type: String, required: true},
+  CodEspecialidad: {type: Number, required: true },
   especialidad: { type: String, required: true },
   agenda: [{
     paciente: { type: mongoose.Schema.Types.ObjectId, ref: 'Paciente' },
